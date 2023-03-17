@@ -75,7 +75,7 @@ Token Token_stream::get()
     switch (ch) {
     case '=':    // for "print"
     case 'x':    // for "quit"
-    case '(': case ')': case '+': case '-': case '*': case '/': case '%':
+    case '(': case ')': case '+': case '-': case '!': case '*': case '/': case '%':
         return Token(ch);        // let each character represent itself
     case '.':
     case '0': case '1': case '2': case '3': case '4':
@@ -89,6 +89,8 @@ Token Token_stream::get()
     default:
         error("Bad token");
     }
+
+    return 0;
 }
 
 //------------------------------------------------------------------------------
@@ -99,7 +101,7 @@ Token_stream ts;        // provides get() and putback()
 
 double expression();    // declaration so that primary() can call expression()
 
-//------------------------------------------------------------------------------
+//--------------    ----------------------------------------------------------------
 
 // deal with numbers and parentheses
 double primary()
@@ -118,6 +120,8 @@ double primary()
     default:
         error("primary expected");
     }
+
+    return 0;
 }
 
 //------------------------------------------------------------------------------
@@ -130,6 +134,23 @@ double term()
 
     while (true) {
         switch (t.kind) {
+        //uncompleted i need to modify the grammar and put ! in a higher level
+        case '!':
+            {
+                int l = left;
+                if (l == 0) { left = 1; }
+                else {
+                    int value = 1;
+                    for (int i = 0; i < l; i++) {
+                        value *= l-i;
+                    }
+
+                    left = value;
+                }
+
+                t = ts.get();
+                break;
+            }
         case '*':
             left *= primary();
             t = ts.get();
@@ -188,7 +209,7 @@ double expression()
 int main()
 try
 {
-    cout << "Welcome to our simple calculator. \n Please enterexpressions using floating-point numbers.";
+    cout << "Welcome to our simple calculator. \n Please enterexpressions using floating-point numbers." << endl;
     
 
     double val;
